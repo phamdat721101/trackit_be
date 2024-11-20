@@ -87,21 +87,28 @@ exports.claim_token = async(req, res, next) =>{
 // }
 
 exports.token_info = async(req, res, next) =>{
-    res.json([
-        {
-            "url": "https://dexscreener.com/solana/6257uclpbzqccm8x4mptn19wqbcndwfvquomlejf2e1b",
-            "chainId": "Solana",
-            "tokenAddress": "6UWNmC8NHHquKQZShp4Mgj13HBE8pKj2BTq5UJPSpump",
-            "icon": "https://example.com",
-            "header": "https://example.com",
-            "description": "text",
-            "links": [
-              {
-                "type": "text",
-                "label": "twitter",
-                "url": "https://x.com/Trinitytoken_AI"
-              }
-            ]
+    let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: 'https://aptos.hatchy.fun/token/get-token-list?page=1&perPage=9',
+        headers: { 
+          'Accept': 'application/json, text/plain, */*', 
+          'Accept-Language': 'en-US,en;q=0.9', 
+          'Connection': 'keep-alive', 
+          'DNT': '1', 
+          'If-None-Match': 'W/"1df9-tq/rZtM0RrJG+LVbPFwmaEjb4X8"', 
+          'Origin': 'https://warpgate.fun', 
+          'Referer': 'https://warpgate.fun/', 
+          'Sec-Fetch-Dest': 'empty', 
+          'Sec-Fetch-Mode': 'cors', 
+          'Sec-Fetch-Site': 'cross-site', 
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', 
+          'sec-ch-ua': '"Chromium";v="131", "Not_A Brand";v="24"', 
+          'sec-ch-ua-mobile': '?0', 
+          'sec-ch-ua-platform': '"macOS"'
         }
-    ])
+    };
+
+    let resp = await axios.request(config);    
+    res.json(resp.data.paginatedResult.results)
 }
