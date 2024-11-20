@@ -5,17 +5,17 @@ const link_abi = require('../config/abi/link_abi.json')
 const axios = require('axios');
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 
-const link_provider = new HDWalletProvider({ 
-    privateKeys: ['eedddc0cdc167430de9383d213a9b53c67aefd61bf3c277e3dbe01ee206f9230'], 
-    providerOrUrl: "https://arbitrum.llamarpc.com",
-    pollingInterval: 8000
-});
+// const link_provider = new HDWalletProvider({ 
+//     privateKeys: ['eedddc0cdc167430de9383d213a9b53c67aefd61bf3c277e3dbe01ee206f9230'], 
+//     providerOrUrl: "https://arbitrum.llamarpc.com",
+//     pollingInterval: 8000
+// });
 
 // Set up the Web3 instance
 const providerUrl = "https://sepolia.metisdevops.link";
 const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
 
-Contract.setProvider(link_provider)
+// Contract.setProvider(link_provider)
 
 exports.claim_token = async(req, res, next) =>{
     const scriptURLGet = "https://script.google.com/macros/s/AKfycbwpKywlfgvuc_P_6ZYtAArtiKW9pgEmGuuKpmWOsqcAqQbG2C1My2kaV3eQkUdMicTK/exec"
@@ -34,54 +34,74 @@ exports.claim_token = async(req, res, next) =>{
     res.json(receipt)
 }
 
-exports.get_xau_price = async(req, res, next) =>{
-    let link_contract = new Contract(link_abi, "0x1F954Dc24a49708C26E0C1777f16750B5C6d5a2c")
+// exports.get_xau_price = async(req, res, next) =>{
+//     let link_contract = new Contract(link_abi, "0x1F954Dc24a49708C26E0C1777f16750B5C6d5a2c")
 
-    let latestRoundId = await link_contract.methods.latestRound().call();
-    let contract_resp = await link_contract.methods.getRoundData(latestRoundId).call();
+//     let latestRoundId = await link_contract.methods.latestRound().call();
+//     let contract_resp = await link_contract.methods.getRoundData(latestRoundId).call();
 
-    res.json({
-        roundId: contract_resp.roundId,
-        price: contract_resp.answer / 1e18, // Convert from wei to ether (assuming answer is in wei)
-        startedAt: contract_resp.startedAt,
-        updatedAt: contract_resp.updatedAt,
-        answeredInRound: contract_resp.answeredInRound
-    });
-}
+//     res.json({
+//         roundId: contract_resp.roundId,
+//         price: contract_resp.answer / 1e18, // Convert from wei to ether (assuming answer is in wei)
+//         startedAt: contract_resp.startedAt,
+//         updatedAt: contract_resp.updatedAt,
+//         answeredInRound: contract_resp.answeredInRound
+//     });
+// }
 
-exports.get_tx_by_addr = async(req, res, next) =>{
-    let addr = req.query.addr
-    let contract = "0x01368f47E2DA0F8259E6d9D23dA18e3CCec02a39"
-    const url = `https://sepolia-explorer-api.metisdevops.link/api/v2/addresses/${addr}/transactions?filter=${contract}`;
+// exports.get_tx_by_addr = async(req, res, next) =>{
+//     let addr = req.query.addr
+//     let contract = "0x01368f47E2DA0F8259E6d9D23dA18e3CCec02a39"
+//     const url = `https://sepolia-explorer-api.metisdevops.link/api/v2/addresses/${addr}/transactions?filter=${contract}`;
 
-    const response = await axios.get(url, {
-        headers: {
-            'accept': 'application/json'
+//     const response = await axios.get(url, {
+//         headers: {
+//             'accept': 'application/json'
+//         }
+//     });
+
+//     let resp = response.data.items.map((item) =>{        
+//         return {
+//             tx_hash: item.hash,
+//             from: addr,
+//             to: contract,
+//             timestamp: item.timestamp
+//         }
+//     })
+
+//     for(let i = 0; i < resp.length; i++){
+//         let tx_url = `https://sepolia-explorer-api.metisdevops.link/api/v2/transactions/${resp[i].tx_hash}`
+//         let tx_info = await axios.get(tx_url, {
+//             headers: {
+//                 'accept': 'application/json'
+//             }
+//         });
+//         if(tx_info.data.value > 0){
+//             resp[i].type = "buy"
+//         }else{
+//             resp[i].type = "sell"
+//         }
+//     }
+
+//     res.json(resp)
+// }
+
+exports.token_info = async(req, res, next) =>{
+    res.json([
+        {
+            "url": "https://dexscreener.com/solana/6257uclpbzqccm8x4mptn19wqbcndwfvquomlejf2e1b",
+            "chainId": "Solana",
+            "tokenAddress": "6UWNmC8NHHquKQZShp4Mgj13HBE8pKj2BTq5UJPSpump",
+            "icon": "https://example.com",
+            "header": "https://example.com",
+            "description": "text",
+            "links": [
+              {
+                "type": "text",
+                "label": "twitter",
+                "url": "https://x.com/Trinitytoken_AI"
+              }
+            ]
         }
-    });
-
-    let resp = response.data.items.map((item) =>{        
-        return {
-            tx_hash: item.hash,
-            from: addr,
-            to: contract,
-            timestamp: item.timestamp
-        }
-    })
-
-    for(let i = 0; i < resp.length; i++){
-        let tx_url = `https://sepolia-explorer-api.metisdevops.link/api/v2/transactions/${resp[i].tx_hash}`
-        let tx_info = await axios.get(tx_url, {
-            headers: {
-                'accept': 'application/json'
-            }
-        });
-        if(tx_info.data.value > 0){
-            resp[i].type = "buy"
-        }else{
-            resp[i].type = "sell"
-        }
-    }
-
-    res.json(resp)
+    ])
 }
