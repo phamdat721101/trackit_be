@@ -1,29 +1,8 @@
 const axios = require('axios');
+const { json } = require('express');
 
 exports.token_info = async(req, res, next) =>{
-    let config = {
-        method: 'get',
-        maxBodyLength: Infinity,
-        url: 'https://aptos.hatchy.fun/token/get-token-list?page=1&perPage=9',
-        headers: { 
-          'Accept': 'application/json, text/plain, */*', 
-          'Accept-Language': 'en-US,en;q=0.9', 
-          'Connection': 'keep-alive', 
-          'DNT': '1', 
-          'If-None-Match': 'W/"1df9-tq/rZtM0RrJG+LVbPFwmaEjb4X8"', 
-          'Origin': 'https://warpgate.fun', 
-          'Referer': 'https://warpgate.fun/', 
-          'Sec-Fetch-Dest': 'empty', 
-          'Sec-Fetch-Mode': 'cors', 
-          'Sec-Fetch-Site': 'cross-site', 
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', 
-          'sec-ch-ua': '"Chromium";v="131", "Not_A Brand";v="24"', 
-          'sec-ch-ua-mobile': '?0', 
-          'sec-ch-ua-platform': '"macOS"'
-        }
-    };
-
-    let resp = await axios.request(config);    
+    let resp = await axios.get('https://aptos.hatchy.fun/token/get-token-list?page=1&perPage=9');    
     res.json(resp.data.paginatedResult.results)
 }
 
@@ -32,4 +11,50 @@ exports.token_tx = async(req, res, next) =>{
     let token = req.query.token
     let resp = await axios.get(`https://aptos.hatchy.fun/transaction/query-txn/${token}`)
     res.json(resp.data.data)
+}
+
+exports.list_token = async(req, res, next) =>{
+    let limit = req.query.limit;
+    let offset = req.query.offset;
+    let type = Number(req.query.type)
+    /*
+        1: new
+        2: trending
+        3: completed
+    */
+    
+    let resp = await axios.get(`https://aptos.hatchy.fun/token/get-token-list?page=${limit}&perPage=${offset}`);    
+    let tokens = resp.data.paginatedResult.results;
+    switch (type) {
+        case 1:
+            console.log("Token new")
+            tokens = tokens.map((token) =>{
+                if(Number(token.holderPercentage) <= 10){
+                    return token
+                }
+            })
+            res.json(tokens)
+            break;
+        case 2:
+            console.log("Token trending")
+            tokens = tokens.map((token) =>{
+                if(10 <= Number(token.holderPercentage) <= 20){
+                    return token
+                }
+            })
+            res.json(tokens)
+            break;
+        case 3:
+            console.log("Token completed")
+            tokens = tokens.map((token) =>{
+                if(Number(token.holderPercentage) >= 20){
+                    return token
+                }
+            })
+            res.json(tokens)
+            break;
+        default:
+            res.json(tokens)
+            break;
+    }
 }
