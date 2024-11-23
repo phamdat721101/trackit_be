@@ -23,7 +23,7 @@ exports.list_token = async(req, res, next) =>{
         3: completed
     */
     
-    let resp = await axios.get(`https://aptos.hatchy.fun/token/get-token-list?page=${limit}&perPage=${offset}`);    
+    let resp = await axios.get(`https://aptos.hatchy.fun/token/get-token-list?page=${offset}&perPage=${limit}`);    
     let tokens = resp.data.paginatedResult.results;
     switch (type) {
         case 1:
