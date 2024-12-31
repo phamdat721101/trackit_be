@@ -58,3 +58,75 @@ exports.list_token = async(req, res, next) =>{
             break;
     }
 }
+
+exports.swap_route = async(req, res, next) =>{
+    let data = {
+        "srcAsset": "0x1::aptos_coin::AptosCoin",
+        "dstAsset": "0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC",
+        "srcAmount": 100000,
+        "dstAmount": 2056477,
+        "feeAmount": 100000,
+        "isFeeIn": true,
+        "paths": [
+          {
+            "source": "razor_swap",
+            "srcAsset": "0x1::aptos_coin::AptosCoin",
+            "dstAsset": "0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC",
+            "srcAmount": 100000,
+            "dstAmount": 2056477
+          }
+        ],
+        "tx": {
+          "function": "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::swap",
+          "typeArguments": [
+            "0x1::aptos_coin::AptosCoin",
+            "0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC",
+            "0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDT",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null",
+            "0xede23ef215f0594e658b148c2a391b1523335ab01495d8637e076ec510c6ec3c::router::Null"
+          ],
+          "functionArguments": [
+            "0x47652bd91e7cf0ca0476eaff712f360addc1edeadd86352f37586183d0278d08",
+            [
+              "1000000000000"
+            ],
+            [
+              "0",
+              "2",
+              "1",
+              "3",
+              "18446744073709551614",
+              "0",
+              "2",
+              "3",
+              "4"
+            ],
+            [
+              "0xa"
+            ],
+            [
+              "0x234f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f"
+            ],
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0",
+            false,
+            "2000000000000",
+            "10",
+            "pid",
+            "{}"
+          ]
+        }
+    }
+
+    res.json(data)
+}
