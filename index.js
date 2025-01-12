@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 
 const token = require('./routes/token.route')
+const yield = require('./routes/yield.route')
 
 require("dotenv").config();
   
@@ -15,6 +16,7 @@ app.use(cors({
 }));
 
 app.use('/v1/token', token)
+app.use('/v1/yield', yield)
 
 
 app.get('/', async (req, res) => {
