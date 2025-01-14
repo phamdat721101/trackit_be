@@ -3,6 +3,7 @@ const { json } = require('express');
 
 exports.yield_info = async(req, res, next) =>{
     let chain = req.query.chain;
+    let token = req.query.token;
     let resp = [
         {
             "id": 1,
@@ -44,5 +45,34 @@ exports.yield_info = async(req, res, next) =>{
             }
         }
     ]
+
+    if(token == "kaia"){
+        resp = [
+            {
+                "token":"kaia",
+                "apr":"7.36",
+                "unit":"%",
+                "protocol":"wormwhole"
+            },
+            {
+                "token":"kaia",
+                "apr":"5.23",
+                "unit":"%",
+                "protocol":"lst protocol"
+            },
+            {
+                "token":"kaia",
+                "apr":"0.02",
+                "unit":"%",
+                "protocol":"krwo"
+            },
+            {
+                "token":"kaia",
+                "apr":"1.17",
+                "unit":"%",
+                "protocol":"stargate"
+            }            
+        ]
+    }
     res.json(resp)
 }

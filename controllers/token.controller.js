@@ -64,7 +64,7 @@ exports.swap_route = async(req, res, next) =>{
     let dstAddr = "0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC"
     const response = await axios({
       method: "GET",
-      url: "https://api.mosaic.ag/v1/quote",
+      url: "https://testnet.mosaic.ag/porto/v1/quote",
       params: {
         srcAddr,
         dstAddr,
@@ -76,7 +76,9 @@ exports.swap_route = async(req, res, next) =>{
         "X-API-KEY": "KlYDzVvy9EZ6jjUFpYcAKVmFkLyC9CeN",
       },
     });
-    const data = await response.json();
+    // const data = await response.json();
 
-    res.json(data.data)
+    console.log("PQD Data: ", response.data)
+
+    res.json(response.data)
 }
