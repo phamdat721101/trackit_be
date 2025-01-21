@@ -62,23 +62,50 @@ exports.list_token = async(req, res, next) =>{
 exports.swap_route = async(req, res, next) =>{
     let srcAddr = "0x1::aptos_coin::AptosCoin"
     let dstAddr = "0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC"
-    const response = await axios({
-      method: "GET",
-      url: "https://testnet.mosaic.ag/porto/v1/quote",
-      params: {
-        srcAddr,
-        dstAddr,
-        amount:100
-        // sender: user.accountAddress.toString(),
-        // slippage: 100, // 100 = 1%
-      },
-      headers: {
-        "X-API-KEY": "KlYDzVvy9EZ6jjUFpYcAKVmFkLyC9CeN",
-      },
-    });
-    // const data = await response.json();
+    let amount = 100; // Consider making this dynamic based on user input if needed
+    let api_key = process.env.API_KEY;
 
-    console.log("PQD Data: ", response.data)
+    // Log the parameters being sent
+    console.log("Request Parameters:", { srcAddr, dstAddr, amount });
 
-    res.json(response.data)
+    try {
+        const response = await axios({
+            method: "GET",
+            url: "https://testnet.mosaic.ag/porto/v1/quote",
+            params: {
+                srcAsset: srcAddr,
+                dstAsset: dstAddr,
+                amount,
+                // sender: user.accountAddress.toString(), // Uncomment if needed
+                // slippage: 100, // Uncomment if needed
+            },
+            headers: {
+                "X-API-KEY": api_key,
+            },
+        });
+
+        console.log("PQD Data: ", response.data);
+        res.json(response.data.data);
+    } catch (error) {
+        // Check if the error response exists
+        if (error.response) {
+            // Log the error details
+            console.error("Error Response:", error.response.data);
+            console.error("Error Status:", error.response.status);
+            console.error("Error Headers:", error.response.headers);
+
+            // Send a structured error response to the client
+            res.status(error.response.status).json({
+                message: 'Error occurred while processing the request',
+                details: error.response.data,
+            });
+        } else {
+            // Handle other types of errors (e.g., network errors)
+            console.error("Error Message:", error.message);
+            res.status(500).json({
+                message: 'An unexpected error occurred',
+                details: error.message,
+            });
+        }
+    }
 }
