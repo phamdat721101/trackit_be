@@ -17,6 +17,13 @@ exports.list_token = async(req, res, next) =>{
     let limit = req.query.limit;
     let offset = req.query.offset;
     let type = Number(req.query.type)
+    let chain = req.query.chain;
+    if(chain == "sui"){
+        let resp = await axios.get(`https://api.turbos.finance/fun/pools?search=&sort=created_at&completed=false&page=${offset}&pageSize=${limit}&direction=desc`);    
+        let tokens = resp.data.data;
+        res.json(tokens)
+        return
+    }
     /*
         1: new
         2: trending
