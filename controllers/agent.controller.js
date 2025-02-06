@@ -1,6 +1,34 @@
 const axios = require('axios');
 const { json } = require('express');
 
+exports.chat = async(req, res, next) =>{
+    const YOUR_API_KEY = process.env.ATOMA_API_KEY;
+    const MODEL_NAME = process.env.MODEL_NAME;
+    const content = req.body.content;
+
+    axios.post('https://api.atoma.network/v1/chat/completions', {
+        stream: false,
+        model: MODEL_NAME,
+        messages: [{
+            role: 'assistant',
+            content: content
+        }],
+        max_tokens: 124
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${YOUR_API_KEY}`
+        }
+    })
+    .then(response => {
+        console.log(response.data);
+        res.json(response.data.choices[0].message.content)
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 exports.token_predict = async(req, res, next) =>{
     let name = req.body.name;
     let symbol = req.body.symbol;
