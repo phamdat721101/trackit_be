@@ -14,8 +14,8 @@ exports.token_tx = async(req, res, next) =>{
 }
 
 exports.list_token = async(req, res, next) =>{
-    let limit = req.query.limit;
-    let offset = req.query.offset;
+    let limit = req.query.limit || 10;
+    let offset = req.query.offset || 1;
     let type = Number(req.query.type)
     let chain = req.query.chain;
     if(chain == "sui"){
@@ -32,6 +32,10 @@ exports.list_token = async(req, res, next) =>{
     
     let resp = await axios.get(`https://aptos.hatchy.fun/token/get-token-list?page=${offset}&perPage=${limit}`);    
     let tokens = resp.data.paginatedResult.results;
+    tokens.map((token) =>{
+        token.exchange = 'warpgate'
+        token.pool_url = `https://warpgate.fun/trading-view/${token.mintAddr}`
+    })
     switch (type) {
         case 1:
             console.log("Token new")
