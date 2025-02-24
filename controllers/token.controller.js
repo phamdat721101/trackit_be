@@ -2,8 +2,66 @@ const axios = require('axios');
 const { json } = require('express');
 
 exports.token_info = async(req, res, next) =>{
-    let resp = await axios.get('https://aptos.hatchy.fun/token/get-token-list?page=1&perPage=9');    
-    res.json(resp.data.paginatedResult.results)
+    try {
+        // Get token address from query parameters.
+        const tokenAddress = req.query.token;
+        if (!tokenAddress) {
+            return res.status(400).json({ message: 'Missing token address in query parameter' });
+        }
+
+        // Fetch full token info from Warpgate API.
+        const tokenResp = await axios.get(`https://api.warpgate.pro/token/get-token/${tokenAddress}`);
+        const tokenInfo = tokenResp.data;
+
+        // Determine mint address; prefer mintAddr or mint if available.
+        const mint = tokenInfo.mintAddr || tokenInfo.mint || tokenAddress;
+
+        // Define the intervals (in minutes) for which we want price change percentages.
+        const intervals = {
+            "5M": 5,
+            "15M": 15,
+            "1H": 60,
+            "24H": 1440,
+        };
+
+        let priceChange = {};
+
+        // For each interval, query the candlestick API and compute the percentage change.
+        await Promise.all(
+            Object.entries(intervals).map(async ([label, minutes]) => {
+            const url = `https://api.warpgate.pro/token/query-candlestick?mint=${mint}&intervalMin=${minutes}&offset=0&limit=1000&startTime=1720569600000&endTime=1739458816000`;
+            try {
+                const candleResp = await axios.get(url);
+                const candles = candleResp.data.data;
+                if (candles && candles.length > 0) {
+                const first = candles[0];
+                const last = candles[candles.length - 1];
+                // Avoid division by zero.
+                if (first.open !== 0) {
+                    const pct = ((last.close - first.open) / first.open) * 100;
+                    priceChange[label] = pct;
+                } else {
+                    priceChange[label] = null;
+                }
+                } else {
+                priceChange[label] = null;
+                }
+            } catch (err) {
+                console.error(`Error fetching candlestick for interval ${label} for token ${mint}:`, err.message);
+                priceChange[label] = null;
+            }
+            })
+        );
+
+        // Add the computed price change percentages to the token info.
+        tokenInfo.price_change_percentage = priceChange;
+
+        // Return the full token info JSON including the new field.
+        res.json(tokenInfo);
+    } catch (err) {
+        console.error("Error in token_info:", err.message);
+        res.status(500).json({ message: "Error fetching token info", details: err.message });
+    }
 }
 
 exports.token_tx = async(req, res, next) =>{
@@ -71,8 +129,8 @@ exports.list_token = async(req, res, next) =>{
 }
 
 exports.swap_route = async(req, res, next) =>{
-    let srcAddr = "0x1::aptos_coin::AptosCoin"
-    let dstAddr = "0x275f508689de8756169d1ee02d889c777de1cebda3a7bbcce63ba8a27c563c6f::tokens::USDC"
+    let srcAddr = req.query.src_adr
+    let dstAddr = req.query.dst_adr
     let amount = 100; // Consider making this dynamic based on user input if needed
     let api_key = process.env.API_KEY;
 
