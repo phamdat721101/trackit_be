@@ -67,7 +67,7 @@ exports.token_info = async(req, res, next) =>{
 exports.token_tx = async(req, res, next) =>{
     // let token = '0xe8272500f90ca42e49a95111619b0d1e9cf6983d80b05836cc18cde237f4531c::ZAD::ZAD'
     let token = req.query.token
-    let resp = await axios.get(`https://aptos.hatchy.fun/transaction/query-txn/${token}`)
+    let resp = await axios.get(`https://api.warpgate.fun/transaction/query-txn/${token}`)
     res.json(resp.data.data)
 }
 
@@ -88,7 +88,7 @@ exports.list_token = async(req, res, next) =>{
         3: completed
     */
     
-    let resp = await axios.get(`https://aptos.hatchy.fun/token/get-token-list?page=${offset}&perPage=${limit}`);    
+    let resp = await axios.get(`https://api.warpgate.fun/token/get-token-list?page=${offset}&perPage=${limit}`);    
     let tokens = resp.data.paginatedResult.results;
     tokens.map((token) =>{
         token.exchange = 'warpgate'
