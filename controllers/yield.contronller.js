@@ -76,3 +76,15 @@ exports.yield_info = async(req, res, next) =>{
     }
     res.json(resp)
 }
+
+exports.list_pool = async(req, res, next) =>{
+    const pools = [
+        {
+            "pool_id":"",
+            "coin_a":"0x1::aptos_coin::AptosCoin",
+            "coin_b":"0xa9e39026c4a793078bec2dda05c0d46a1d961145d3d666eb63d150fdf44b6ccf::rushi_coin::RushiCoin",
+        }
+    ]
+
+    res.json(pools)
+}
