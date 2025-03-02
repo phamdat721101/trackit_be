@@ -10,7 +10,7 @@ exports.token_info = async(req, res, next) =>{
         }
 
         // Fetch full token info from Warpgate API.
-        const tokenResp = await axios.get(`https://api.warpgate.pro/token/get-token/${tokenAddress}`);
+        const tokenResp = await axios.get(`https://api.warpgate.fun/token/get-token/${tokenAddress}`);
         const tokenInfo = tokenResp.data;
 
         // Determine mint address; prefer mintAddr or mint if available.
@@ -29,7 +29,7 @@ exports.token_info = async(req, res, next) =>{
         // For each interval, query the candlestick API and compute the percentage change.
         await Promise.all(
             Object.entries(intervals).map(async ([label, minutes]) => {
-            const url = `https://api.warpgate.pro/token/query-candlestick?mint=${mint}&intervalMin=${minutes}&offset=0&limit=1000&startTime=1720569600000&endTime=1739458816000`;
+            const url = `https://api.warpgate.fun/token/query-candlestick?mint=${mint}&intervalMin=${minutes}&offset=0&limit=1000&startTime=1720569600000&endTime=1739458816000`;
             try {
                 const candleResp = await axios.get(url);
                 const candles = candleResp.data.data;
