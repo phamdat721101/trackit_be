@@ -78,13 +78,15 @@ exports.yield_info = async(req, res, next) =>{
 }
 
 exports.list_pool = async(req, res, next) =>{
-    const pools = [
-        {
-            "pool_id":"",
-            "coin_a":"0x1::aptos_coin::AptosCoin",
-            "coin_b":"0xa9e39026c4a793078bec2dda05c0d46a1d961145d3d666eb63d150fdf44b6ccf::rushi_coin::RushiCoin",
-        }
-    ]
-
+    let chain = req.query.chain || 'aptos'
+    let dex = req.query.dex || 'cellana'
+    let offset = req.query.offset || 1
+    let limit = req.query.limit || 1000
+    
+    let pools = []
+    if (chain == 'aptos' && dex == 'cellana'){
+        let pools_resp = await axios.get(`https://api-v2.cellana.finance/api/v1/pool/undefined?page=${offset}&limit=${limit}`)
+        pools = pools_resp.data.data
+    }
     res.json(pools)
 }

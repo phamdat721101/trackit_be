@@ -129,8 +129,8 @@ exports.list_token = async(req, res, next) =>{
 }
 
 exports.swap_route = async(req, res, next) =>{
-    let srcAddr = req.query.src_adr
-    let dstAddr = req.query.dst_adr
+    let srcAddr = req.query.src_adr || ''
+    let dstAddr = req.query.dst_adr || ''
     let amount = 100; // Consider making this dynamic based on user input if needed
     let api_key = process.env.API_KEY;
 
