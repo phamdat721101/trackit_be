@@ -8,6 +8,7 @@ const yield = require('./routes/yield.route')
 const agent = require('./routes/agent.route')
 const option = require('./routes/option.route')
 const user = require('./routes/user.route')
+const moveFun = require('./routes/move_fun.route')
 
 require("dotenv").config();
   
@@ -23,6 +24,7 @@ app.use('/v1/yield', yield)
 app.use('/v1/agent', agent)
 app.use('/v1/option', option)
 app.use('/v1/user', user)
+app.use('/v1/move_fun', moveFun)
 
 app.get('/', async (req, res) => {
     res.json({
