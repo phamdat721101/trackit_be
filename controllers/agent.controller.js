@@ -1,7 +1,56 @@
 const axios = require('axios');
 const { json } = require('express');
+const OpenAI = require('openai')
+const { Ed25519Keypair } = require("@mysten/sui/keypairs/ed25519");
+const { getFullnodeUrl, SuiClient } = require('@mysten/sui/client');
+const { Transaction } = require('@mysten/sui/transactions');
 
-exports.chat = async(req, res, next) =>{
+// Replace with your actual private key in base64 format
+const mnemonic = 'program level hungry inflict slim venue coil cereal either input nominee calm';
+
+const keypair = Ed25519Keypair.deriveKeypair(mnemonic);
+
+const client = new SuiClient({ url: getFullnodeUrl('testnet') });
+
+exports.chat = async(req, res, next) =>{    
+    if(req.body.content == "invest for me"){
+        const tx = new Transaction();
+        const package = "0x5dda419f3a10a6d0f8add4008e0445210a35fcdfafb2fff99793a1790d83651a"
+        const address = keypair.getPublicKey().toSuiAddress();
+        tx.setSender(address);
+
+        // 1. Split your gas coin into smaller coins
+        const gasCoin = tx.gas;
+        const splitCoin = tx.splitCoins(gasCoin, [10000000]);
+
+        // Example: calling a contract function
+        tx.moveCall({
+        target: `${package}::fundx::contribute`, // package ID, module, function
+        arguments: [
+            tx.object("0xb9ccb3ec2acb0629fbb5a0dc32e4d8c3b3ccc6e444901960640564e2d9376977"),
+            splitCoin,
+            tx.pure.u64(100000),
+            tx.object('0x6')
+        ],
+        typeArguments: [], // if your Move function needs type arguments, add here
+        });
+    
+        const { bytes, signature } = await tx.sign({ client, signer: keypair });
+    
+        const result = await client.executeTransactionBlock({
+        transactionBlock: bytes,
+        signature,
+        options: {
+            showEffects: true,
+        },
+        requestType: 'WaitForLocalExecution',
+        });
+    
+        console.log('Move Contract Call Result:', result);
+        return res.json(
+            `✅ Investment Successful!\n\n🔗 View your transaction: https://suiscan.xyz/testnet/tx/${result.digest}\n\nThank you for investing with us! 🚀`
+        );
+    }
     // const YOUR_API_KEY = process.env.ATOMA_API_KEY;
     // const MODEL_NAME = process.env.MODEL_NAME;
     // const content = req.body.content;
@@ -28,7 +77,25 @@ exports.chat = async(req, res, next) =>{
     //     console.error('Error:', error);
     // });
 
+    // const apiKey = "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";
+    // const url = "https://api.deepseek.com/chat/completions";
+
+    // const openai = new OpenAI({
+    //     baseURL: 'https://api.deepseek.com',
+    //     apiKey: apiKey
+    // });
+    
+    // const completion = await openai.chat.completions.create({
+    //     messages: [{ role: "system", content: "Give me today sui market news." }],
+    //     model: "deepseek-chat",
+    //   });
+    
+    // console.log(completion.choices[0].message.content);
+
+    // res.json(completion.choices[0].message.content)
+    let chat_message = req.body.content
     if(req.body.content == "sui profit token"){
+        console.log("Sui profit")
         const dummyTokens = [
             { tokenName: "SUI Profit Alpha", profitPercentage: "10%", strategy: "Staking" },
             { tokenName: "SUI Profit Beta", profitPercentage: "12%", strategy: "Yield Farming" },
@@ -36,9 +103,21 @@ exports.chat = async(req, res, next) =>{
             { tokenName: "SUI Profit Delta", profitPercentage: "8%", strategy: "Automated Optimization" }
         ];
         return res.json(JSON.stringify(dummyTokens));
+    }else if(req.body.content == "yield info"){
+        return res.json("Optimizing yield on Aptos involves several strategies that leverage the blockchain's staking and DeFi ecosystem. Here are some key methods to consider:\n\n1. **Staking**:\n   - **Direct Staking**: You can earn yield by staking your APT tokens directly with a validator. This supports the Aptos blockchain's consensus process, and in return, you accrue rewards as compound interest on your staked amount. The reward rate can vary, but it typically starts around 7% annually and decreases over time [1,11].\n   - **Liquid Staking**: Platforms like Tortuga offer liquid staking, where you stake APT and receive tAPT tokens in return. These tAPT tokens can be used in various DeFi activities while still earning staking rewards. This approach allows you to maintain liquidity while earning yield [2,12].\n\n2. **Yield Farming and DeFi Strategies**:\n   - **Leveraged Yield Farming**: By using platforms like Aries Markets, you can lend tAPT tokens, borrow APT, and then restake the borrowed APT. This loop can be repeated to amplify your staking yield, potentially reaching up to 19-20% APY. However, this strategy comes with risks, including liquidation risk if the value of your collateral drops significantly [2,12].\n   - **Yield Aggregators**: Platforms like Satay Finance offer curated vault strategies that optimize yields by interacting with multiple DeFi protocols. These aggregators use algorithms to move funds across different pools to maximize returns [6].\n\n3. **Automated Yield Optimization**:\n   - **Automated Bots**: Some protocols, like Eternal Finance, provide automated bots that optimize yield farming strategies on Aptos. These bots can help manage and optimize your yield farming experience by automatically adjusting strategies based on market conditions [0].\n\n4. **Risk Management**:\n   - **Diversification**: Diversify your staking and yield farming activities across multiple platforms and strategies to mitigate risks.\n   - **Monitoring**: Regularly monitor your staking pools and DeFi positions to ensure they remain active and profitable.\n\nBy combining these strategies, you can optimize your yield on Aptos while managing risks effectively. Always conduct thorough research and consider the potential risks before engaging in any yield optimization strategies.")
+    }else if(req.body.content.includes("sui market news")){
+        return res.json("🚀 **SUI Market Update – April 27, 2025** 🚀\n \n" +
+        "📈 **Live Price:** $3.54 (24h +12%, 7d +74%)\n \n" +
+        "💧 **TVL Surge:** $1.645B (+38% 7d)\n \n" +
+        "🔄 **DEX Volume:** $599M (+177% 24h)\n \n" +
+        "📊 **Technical Breakout:** Broke 108-day resistance, next target $4.00\n \n" +
+        "🌐 **Events:** Harvard Blockchain (Apr 26–27), Web Summit Rio (Apr 27–30)\n \n" +
+        "💡 **Short-Term Target:** $3.85 (Fibonacci 2.618)\n \n" +
+        "⏳ **Derivatives OI:** $1.51B on SUI\n \n" +
+        "💬 Stay tuned for more updates!");
+    }else{
+        res.json("Hi, how can I help you?")
     }
-
-    res.json("Optimizing yield on Aptos involves several strategies that leverage the blockchain's staking and DeFi ecosystem. Here are some key methods to consider:\n\n1. **Staking**:\n   - **Direct Staking**: You can earn yield by staking your APT tokens directly with a validator. This supports the Aptos blockchain's consensus process, and in return, you accrue rewards as compound interest on your staked amount. The reward rate can vary, but it typically starts around 7% annually and decreases over time [1,11].\n   - **Liquid Staking**: Platforms like Tortuga offer liquid staking, where you stake APT and receive tAPT tokens in return. These tAPT tokens can be used in various DeFi activities while still earning staking rewards. This approach allows you to maintain liquidity while earning yield [2,12].\n\n2. **Yield Farming and DeFi Strategies**:\n   - **Leveraged Yield Farming**: By using platforms like Aries Markets, you can lend tAPT tokens, borrow APT, and then restake the borrowed APT. This loop can be repeated to amplify your staking yield, potentially reaching up to 19-20% APY. However, this strategy comes with risks, including liquidation risk if the value of your collateral drops significantly [2,12].\n   - **Yield Aggregators**: Platforms like Satay Finance offer curated vault strategies that optimize yields by interacting with multiple DeFi protocols. These aggregators use algorithms to move funds across different pools to maximize returns [6].\n\n3. **Automated Yield Optimization**:\n   - **Automated Bots**: Some protocols, like Eternal Finance, provide automated bots that optimize yield farming strategies on Aptos. These bots can help manage and optimize your yield farming experience by automatically adjusting strategies based on market conditions [0].\n\n4. **Risk Management**:\n   - **Diversification**: Diversify your staking and yield farming activities across multiple platforms and strategies to mitigate risks.\n   - **Monitoring**: Regularly monitor your staking pools and DeFi positions to ensure they remain active and profitable.\n\nBy combining these strategies, you can optimize your yield on Aptos while managing risks effectively. Always conduct thorough research and consider the potential risks before engaging in any yield optimization strategies.")
 }
 
 exports.token_predict = async(req, res, next) =>{
