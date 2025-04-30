@@ -13,6 +13,7 @@
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.35.0",
     "@envio-dev/hypersync-client": "^0.6.2",
+    "@flowx-finance/sdk": "^1.10.16",
     "@google-cloud/local-auth": "^2.1.0",
     "@mysten/sui": "^1.28.2",
     "@supabase/supabase-js": "^2.49.1",

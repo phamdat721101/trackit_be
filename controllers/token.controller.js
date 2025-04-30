@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { json } = require('express');
+const { AmmPoolManager, AggregatorQuoter, AggregatorQuoterQueryParams } = require('@flowx-finance/sdk');
 
 exports.token_info = async(req, res, next) =>{
     try {
@@ -65,10 +66,52 @@ exports.token_info = async(req, res, next) =>{
 }
 
 exports.token_tx = async(req, res, next) =>{
-    // let token = '0xe8272500f90ca42e49a95111619b0d1e9cf6983d80b05836cc18cde237f4531c::ZAD::ZAD'
-    let token = req.query.token
-    let resp = await axios.get(`https://api.warpgate.fun/transaction/query-txn/${token}`)
-    res.json(resp.data.data)
+    // // let token = '0xe8272500f90ca42e49a95111619b0d1e9cf6983d80b05836cc18cde237f4531c::ZAD::ZAD'
+    // let token = req.query.token
+    // let resp = await axios.get(`https://api.warpgate.fun/transaction/query-txn/${token}`)
+    // res.json(resp.data.data)
+    res.json([
+        {
+          tokenMint: "0x1a2b3c4d5e6f7g8h9i0j",
+          txnHash: "0xabc123def456ghi789jkl012mno345pq",
+          side: "buy",
+          username: "suiTrader01",
+          userWalletAddr: "0x01aB23Cd45Ef678GhIj9KL0MnPqRStU2vW",
+          userAvatar: "https://example.com/avatars/user1.png",
+          xAmt: "1500.00",
+          yAmt: "0.0432",
+          gas: null,
+          timestamp: "1745850920000000",
+          status: "success",
+        },
+        {
+          tokenMint: "0x9z8y7x6w5v4u3t2s1r0q",
+          txnHash: "0xdef789ghi012jkl345mno678pqr901stu",
+          side: "sell",
+          username: "DeFiAlice",
+          userWalletAddr: "0xAaBbCcDdEeFf00112233445566778899",
+          userAvatar: null,
+          xAmt: "0.750",
+          yAmt: "2625.00",
+          gas: null,
+          timestamp: "1745852567000000",
+          status: "pending",
+        },
+        {
+          tokenMint: "0xAaBbCcDdEeFfGgHhIiJj",
+          txnHash: "0xghi345jkl678mno901pqr234stu567vwx",
+          side: "buy",
+          username: "SuiWhale",
+          userWalletAddr: "0x1234abcd5678efgh9012ijkl3456mnop",
+          userAvatar: "https://example.com/avatars/user3.jpg",
+          xAmt: "5000.00",
+          yAmt: "0.1408",
+          gas: null,
+          timestamp: "1745857205000000",
+          status: "success",
+        }        
+      ]
+    )
 }
 
 exports.list_token = async(req, res, next) =>{
@@ -177,4 +220,19 @@ exports.swap_route = async(req, res, next) =>{
             });
         }
     }
+}
+
+exports.sui_route = async(req, res, next) =>{
+    const quoter = new AggregatorQuoter('mainnet');
+    const params = {
+        tokenIn: '0x2::sui::SUI',
+        tokenOut: '0x6dae8ca14311574fdfe555524ea48558e3d1360d1607d1c7f98af867e3b7976c::flx::FLX',
+        amountIn: '10000000000',
+        includeSources: null, //optional
+        excludeSources: null, //optional
+        commission: null, //optional, and will be explain later
+    };
+
+    const routes = await quoter.getRoutes(params);
+    res.json(routes)
 }

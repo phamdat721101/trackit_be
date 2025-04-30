@@ -1,92 +1,90 @@
 const axios = require('axios');
-const { json } = require('express');
+const { AmmPoolManager } = require('@flowx-finance/sdk');
 
-exports.yield_info = async(req, res, next) =>{
-    let chain = req.query.chain;
-    let token = req.query.token;
-    let resp = [
-        {
-            "id": 1,
-            "attributes": {
-                "title": "Bifrost Stable Pool",
-                "description_en": "Designed for LSD",
-                "description_zh": "Designed for LSD",
-                "link": "/swap",
-                "apy": null,
-                "category": "swap",
-                "vToken": "vDOT",
-                "createdAt": "2023-11-12T14:52:59.344Z",
-                "updatedAt": "2023-11-13T01:37:48.138Z",
-                "publishedAt": "2023-11-12T14:53:02.434Z",
-                "apy_var": null,
-                "logo": {
-                    "data": {
-                        "id": 240,
-                        "attributes": {
-                            "name": "image 1.png",
-                            "alternativeText": null,
-                            "caption": null,
-                            "width": 129,
-                            "height": 129,
-                            "formats": null,
-                            "hash": "image_1_193ebe5cb8",
-                            "ext": ".png",
-                            "mime": "image/png",
-                            "size": 2.86,
-                            "url": "https://cdn.bifrost.finance/cms/image_1_193ebe5cb8.png",
-                            "previewUrl": null,
-                            "provider": "provider-upload-qiniu-cloud",
-                            "provider_metadata": null,
-                            "createdAt": "2023-11-13T01:37:38.770Z",
-                            "updatedAt": "2023-11-13T01:37:38.770Z"
-                        }
-                    }
-                }
-            }
-        }
-    ]
+/**
+ * Format a raw pool from FlowX SDK into your valid pool structure
+ */
+function formatRawPool(raw) {
+  const [c0, c1] = raw.coins;
+  const [r0str, r1str] = raw.reserves;
+  // Derive symbol & name from coinType suffix
+  const suffix0 = c0.coinType.split('::').pop();
+  const suffix1 = c1.coinType.split('::').pop();
+  const token0 = {
+    id: c0.coinType,
+    name: suffix0.charAt(0) + suffix0.slice(1).toLowerCase(),
+    symbol: suffix0,
+    decimals: c0.decimals,
+    logoURI: ''
+  };
+  const token1 = {
+    id: c1.coinType,
+    name: suffix1.charAt(0) + suffix1.slice(1).toLowerCase(),
+    symbol: suffix1,
+    decimals: c1.decimals,
+    logoURI: ''
+  };
+  // Convert reserves from string to decimal values
+  const reserve0 = parseFloat((Number(r0str) / Math.pow(10, c0.decimals)).toFixed(c0.decimals));
+  const reserve1 = parseFloat((Number(r1str) / Math.pow(10, c1.decimals)).toFixed(c1.decimals));
+  const tvl = parseFloat((reserve0 + reserve1).toFixed(Math.max(c0.decimals, c1.decimals)));
+  const now = new Date().toISOString();
 
-    if(token == "kaia"){
-        resp = [
-            {
-                "token":"kaia",
-                "apr":"7.36",
-                "unit":"%",
-                "protocol":"wormwhole"
-            },
-            {
-                "token":"kaia",
-                "apr":"5.23",
-                "unit":"%",
-                "protocol":"lst protocol"
-            },
-            {
-                "token":"kaia",
-                "apr":"0.02",
-                "unit":"%",
-                "protocol":"krwo"
-            },
-            {
-                "token":"kaia",
-                "apr":"1.17",
-                "unit":"%",
-                "protocol":"stargate"
-            }            
-        ]
-    }
-    res.json(resp)
+  return {
+    pool: {
+      _id: raw.id,
+      name: `${token0.symbol} ↔ ${token1.symbol}`,
+      symbol: `${token0.symbol}/${token1.symbol}`,
+      address: raw.id,
+      apr: parseFloat((raw.feeRate * 100).toFixed(2)),
+      stable: false,
+      tvl,
+      totalSupply: parseFloat(raw.liquiditySupply),
+      reserve0,
+      reserve1,
+      token0Address: token0.id,
+      wrapToken0Address: token0.id,
+      token0,
+      token1Address: token1.id,
+      wrapToken1Address: token1.id,
+      token1,
+      createdAt: now,
+      updatedAt: now,
+      __v: 0
+    },
+    staked0: reserve0,
+    staked1: reserve1
+  };
 }
 
-exports.list_pool = async(req, res, next) =>{
-    let chain = req.query.chain || 'aptos'
-    let dex = req.query.dex || 'cellana'
-    let offset = req.query.offset || 1
-    let limit = req.query.limit || 1000
-    
-    let pools = []
-    if (chain == 'aptos' && dex == 'cellana'){
-        let pools_resp = await axios.get(`https://api-v2.cellana.finance/api/v1/pool/undefined?page=${offset}&limit=${limit}`)
-        pools = pools_resp.data.data
-    }
-    res.json(pools)
-}
+/**
+ * GET /list_pool
+ * Returns pools formatted to the valid structure
+ */
+exports.list_pool = async (req, res, next) => {
+  try {
+    const chain = req.query.chain || 'aptos';
+    const dex = req.query.dex || 'cellana';
+    const offset = parseInt(req.query.offset) || 1;
+    const limit = parseInt(req.query.limit) || 3;
+
+    const poolManager = new AmmPoolManager('mainnet');
+    const rawPools = await poolManager.getPools();
+    // slice pagination
+    const sliceStart = (offset - 1) * limit;
+    const sliceEnd = sliceStart + limit;
+    const selected = rawPools.slice(sliceStart, sliceEnd);
+
+    // transform each raw pool
+    const formatted = selected.map(formatRawPool);
+
+    res.json(formatted);
+  } catch (err) {
+    console.error('Error listing pools:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.yield_info = async (req, res, next) => {
+  res.json('PQD');
+};
