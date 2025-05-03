@@ -236,3 +236,38 @@ exports.sui_route = async(req, res, next) =>{
     const routes = await quoter.getRoutes(params);
     res.json(routes)
 }
+
+exports.search = async(req, res, next) =>{
+    try {
+        // 1. URL-encode the token query parameter  
+        const token = encodeURIComponent(req.query.token);
+        const url = `https://gmgn.ai/vas/api/v1/search?q=${token}`;
+    
+        // 2. Send headers a browser would send (User-Agent, Referer, Origin)
+        const resp = await axios.get(url, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+              'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+              'Chrome/114.0.0.0 Safari/537.36',  
+            'Referer': 'https://gmgn.ai/',  
+            'Origin': 'https://gmgn.ai',  
+            'Accept': 'application/json, text/javascript, */*; q=0.01',  
+          },
+          // 3. If GMGN ever requires cookies / credentials:
+          // withCredentials: true  
+        });
+    
+        // 4. Proxy the JSON right back to your client
+        res.json(resp.data);
+      } catch (err) {
+        console.error('GMGN search error:', err.response?.status, err.message);
+        // Render a friendly error if it’s still a 403
+        if (err.response?.status === 403) {
+          return res
+            .status(403)
+            .json({ error: 'Access forbidden. Have you whitelisted your server IP?' });
+        }
+        next(err);
+    }
+}

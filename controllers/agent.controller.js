@@ -4,9 +4,10 @@ const OpenAI = require('openai')
 const { Ed25519Keypair } = require("@mysten/sui/keypairs/ed25519");
 const { getFullnodeUrl, SuiClient } = require('@mysten/sui/client');
 const { Transaction } = require('@mysten/sui/transactions');
+require('dotenv').config();
 
 // Replace with your actual private key in base64 format
-const mnemonic = 'program level hungry inflict slim venue coil cereal either input nominee calm';
+const mnemonic = process.env.NEXT_PUBLIC_MNM || '';
 
 const keypair = Ed25519Keypair.deriveKeypair(mnemonic);
 
@@ -51,49 +52,7 @@ exports.chat = async(req, res, next) =>{
             `✅ Investment Successful!\n\n🔗 View your transaction: https://suiscan.xyz/testnet/tx/${result.digest}\n\nThank you for investing with us! 🚀`
         );
     }
-    // const YOUR_API_KEY = process.env.ATOMA_API_KEY;
-    // const MODEL_NAME = process.env.MODEL_NAME;
-    // const content = req.body.content;
 
-    // axios.post('https://api.atoma.network/v1/chat/completions', {
-    //     stream: false,
-    //     model: MODEL_NAME,
-    //     messages: [{
-    //         role: 'assistant',
-    //         content: content
-    //     }],
-    //     max_tokens: 124
-    // }, {
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': `Bearer ${YOUR_API_KEY}`
-    //     }
-    // })
-    // .then(response => {
-    //     console.log(response.data);
-    //     res.json(response.data.choices[0].message.content)
-    // })
-    // .catch(error => {
-    //     console.error('Error:', error);
-    // });
-
-    // const apiKey = "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";
-    // const url = "https://api.deepseek.com/chat/completions";
-
-    // const openai = new OpenAI({
-    //     baseURL: 'https://api.deepseek.com',
-    //     apiKey: apiKey
-    // });
-    
-    // const completion = await openai.chat.completions.create({
-    //     messages: [{ role: "system", content: "Give me today sui market news." }],
-    //     model: "deepseek-chat",
-    //   });
-    
-    // console.log(completion.choices[0].message.content);
-
-    // res.json(completion.choices[0].message.content)
-    let chat_message = req.body.content
     if(req.body.content == "sui profit token"){
         console.log("Sui profit")
         const dummyTokens = [
@@ -115,9 +74,54 @@ exports.chat = async(req, res, next) =>{
         "💡 **Short-Term Target:** $3.85 (Fibonacci 2.618)\n \n" +
         "⏳ **Derivatives OI:** $1.51B on SUI\n \n" +
         "💬 Stay tuned for more updates!");
+    }else if (req.body.content === "how to invest 10 sui") {
+       // 10 SUI split across FlowX pools
+        const portfolio = [
+            { name: "COIN/EGG",    amount: 5, apr: 0.30, pct: 50 },
+            { name: "FUD/BLUB",    amount: 3, apr: 0.30, pct: 30 },
+            { name: "SUI/TURBO",   amount: 2, apr: 0.30, pct: 20 },
+        ];
+
+        // Build the details lines
+        const details = portfolio
+            .map(
+            (p) =>
+                `• ${p.name}: ${p.amount} SUI  (APR: ${(p.apr * 100).toFixed(2)}%)`
+            )
+            .join("\n");
+
+        // Build ASCII bar chart (10 chars wide)
+        const chart = portfolio
+            .map(
+            (p) =>
+                `${p.name.padEnd(16)} | ${"▇".repeat(p.pct / 10).padEnd(10)} | ${p.pct}%`
+            )
+            .join("\n");
+
+        // Compute total expected monthly yield
+        const monthlyYield = portfolio
+            .reduce((sum, p) => sum + (p.amount * p.apr) / 12, 0)
+            .toFixed(3);
+
+        // Return the complete string
+        const output = [
+            "📊 *Simulated Portfolio Allocation for 10 SUI on FlowX* 📊",
+            "",
+            details,
+            "",
+            "```",
+            chart,
+            "```",
+            "",
+            `💡 *Est. Monthly Yield:* ${monthlyYield} SUI`,
+            "",
+            "Thank you for investing with us! 🚀",
+        ].join("\n");
+
+        return res.json(output);
     }else{
-        res.json("Hi, how can I help you?")
-    }
+        return res.json("Hi, how can I help you?")
+    }    
 }
 
 exports.token_predict = async(req, res, next) =>{
