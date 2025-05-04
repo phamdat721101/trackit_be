@@ -65,7 +65,25 @@ exports.chat = async(req, res, next) =>{
     }else if(req.body.content == "yield info"){
         return res.json("Optimizing yield on Aptos involves several strategies that leverage the blockchain's staking and DeFi ecosystem. Here are some key methods to consider:\n\n1. **Staking**:\n   - **Direct Staking**: You can earn yield by staking your APT tokens directly with a validator. This supports the Aptos blockchain's consensus process, and in return, you accrue rewards as compound interest on your staked amount. The reward rate can vary, but it typically starts around 7% annually and decreases over time [1,11].\n   - **Liquid Staking**: Platforms like Tortuga offer liquid staking, where you stake APT and receive tAPT tokens in return. These tAPT tokens can be used in various DeFi activities while still earning staking rewards. This approach allows you to maintain liquidity while earning yield [2,12].\n\n2. **Yield Farming and DeFi Strategies**:\n   - **Leveraged Yield Farming**: By using platforms like Aries Markets, you can lend tAPT tokens, borrow APT, and then restake the borrowed APT. This loop can be repeated to amplify your staking yield, potentially reaching up to 19-20% APY. However, this strategy comes with risks, including liquidation risk if the value of your collateral drops significantly [2,12].\n   - **Yield Aggregators**: Platforms like Satay Finance offer curated vault strategies that optimize yields by interacting with multiple DeFi protocols. These aggregators use algorithms to move funds across different pools to maximize returns [6].\n\n3. **Automated Yield Optimization**:\n   - **Automated Bots**: Some protocols, like Eternal Finance, provide automated bots that optimize yield farming strategies on Aptos. These bots can help manage and optimize your yield farming experience by automatically adjusting strategies based on market conditions [0].\n\n4. **Risk Management**:\n   - **Diversification**: Diversify your staking and yield farming activities across multiple platforms and strategies to mitigate risks.\n   - **Monitoring**: Regularly monitor your staking pools and DeFi positions to ensure they remain active and profitable.\n\nBy combining these strategies, you can optimize your yield on Aptos while managing risks effectively. Always conduct thorough research and consider the potential risks before engaging in any yield optimization strategies.")
     }else if(req.body.content.includes("sui market news")){
-        return res.json("🚀 **SUI Market Update – May 4, 2025** 🚀\n \n📈 **Live Price:** $3.29 - $3.35 (24h -1.86% to -4.63%)\n \n💧 **TVL:** Not directly available in provided data, but Sui DeFi ecosystem continues to develop.\n \n🔄 **DEX Volume:** $958M - $1.42B (24h - likely decreased based on overall volume trend)\n \n📊 **Technical Outlook:** Price has seen a recent decrease after previous gains. Monitoring for support levels.\n \n🌐 **Key Developments:** Integration with sBTC and Stacks for BTC DeFi, 21Shares files for spot Sui ETF.\n \n💡 **Near-Term Focus:** Market reaction to new integrations and ETF news.\n \n⏳ **Derivatives OI:** $1.51B (as of previous update, current data not specified in provided info)\n \n💬 Stay tuned for more updates!");
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('en-US', {
+        month: 'long',
+        day:   'numeric',
+        year:  'numeric'
+        });
+
+        const message =
+        "🚀 **SUI Market Update – " + formattedDate + "** 🚀\n\n" +
+        "📈 **Live Price:** $3.29 - $3.35 (24h -1.86% to -4.63%)\n\n" +
+        "💧 **TVL:** Not directly available in provided data, but Sui DeFi ecosystem continues to develop.\n\n" +
+        "🔄 **DEX Volume:** $958M - $1.42B (24h - likely decreased based on overall volume trend)\n\n" +
+        "📊 **Technical Outlook:** Price has seen a recent decrease after previous gains. Monitoring for support levels.\n\n" +
+        "🌐 **Key Developments:** Integration with sBTC and Stacks for BTC DeFi, 21Shares files for spot Sui ETF.\n\n" +
+        "💡 **Near-Term Focus:** Market reaction to new integrations and ETF news.\n\n" +
+        "⏳ **Derivatives OI:** $1.51B (as of previous update, current data not specified in provided info)\n\n" +
+        "💬 Stay tuned for more updates!";
+
+        return res.json(message);
     }else if (req.body.content === "how to invest 10 sui") {
        // 10 SUI split across FlowX pools
         const portfolio = [
