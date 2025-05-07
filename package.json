@@ -29,6 +29,7 @@
     "googleapis": "^105.0.0",
     "hdkey": "^2.1.0",
     "http-status": "^1.7.4",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^5.7.11",
     "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",

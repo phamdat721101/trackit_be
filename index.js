@@ -17,7 +17,8 @@ app.use(express.static('public'))
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true }))
 app.use(cors({
-    origin: '*'
+    origin: '*',
+    credentials: true
 }));
 
 app.use('/v1/token', token)
