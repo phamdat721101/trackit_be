@@ -27,7 +27,7 @@ function formatRawPool(raw) {
   // Convert reserves from string to decimal values
   const reserve0 = parseFloat((Number(r0str) / Math.pow(10, c0.decimals)).toFixed(c0.decimals));
   const reserve1 = parseFloat((Number(r1str) / Math.pow(10, c1.decimals)).toFixed(c1.decimals));
-  const tvl = parseFloat((reserve0 + reserve1).toFixed(Math.max(c0.decimals, c1.decimals)));
+  const tvl = parseFloat(Number(raw.stats.totalLiquidityInUSD).toFixed(2));
   const now = new Date().toISOString();
 
   return {
@@ -36,7 +36,12 @@ function formatRawPool(raw) {
       name: `${token0.symbol} ↔ ${token1.symbol}`,
       symbol: `${token0.symbol}/${token1.symbol}`,
       address: raw.id,
-      apr: parseFloat((raw.feeRate * 100).toFixed(2)),
+      apr: parseFloat(
+        (
+          Number(raw.stats.combinedApr.lpRewardsApr) +
+          Number(raw.stats.combinedApr.farmApr)
+        ).toFixed(2)
+      ),
       stable: false,
       tvl,
       totalSupply: parseFloat(raw.liquiditySupply),
@@ -65,18 +70,42 @@ exports.list_pool = async (req, res, next) => {
   try {
     const chain = req.query.chain || 'aptos';
     const dex = req.query.dex || 'cellana';
-    const offset = parseInt(req.query.offset) || 1;
-    const limit = parseInt(req.query.limit) || 3;
+    const offset = parseInt(req.query.offset, 10) || 1;
+    const limit  = parseInt(req.query.limit, 10)  || 3;
 
-    const poolManager = new AmmPoolManager('mainnet');
-    const rawPools = await poolManager.getPools();
+    // fetch from external API instead of SDK
+    const apiUrl = process.env.POOL_API_URL
+      || 'https://api.flowx.finance/flowx-be/api/explore-stats/top-pools';
+
+    const response = await axios.get(apiUrl);
+    // Handle both top‐level arrays and nested .data arrays
+    const rawPools = Array.isArray(response.data)
+          ? response.data
+          : Array.isArray(response.data.data)
+            ? response.data.data
+            : [];
+    
+    // hydrate from coinX / coinY. reserves default to ["0","0"] since API no longer returns them
+    const normalized = rawPools.map(p => ({
+      ...p,
+      coins: [
+        { coinType: p.coinX.coinType, decimals: p.coinX.decimals },
+        { coinType: p.coinY.coinType, decimals: p.coinY.decimals }
+      ],
+      reserves: ['0', '0']
+    }));        
+
     // slice pagination
     const sliceStart = (offset - 1) * limit;
-    const sliceEnd = sliceStart + limit;
-    const selected = rawPools.slice(sliceStart, sliceEnd);
+    const sliceEnd   = sliceStart + limit;
+    const selected   = normalized.slice(sliceStart, sliceEnd);
 
     // transform each raw pool
-    const formatted = selected.map(formatRawPool);
+    const formatted = selected
+      .map(raw => {
+        return formatRawPool(raw);
+      })
+      .filter(p => p !== null);
 
     res.json(formatted);
   } catch (err) {
