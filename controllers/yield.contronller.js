@@ -32,7 +32,7 @@ function formatRawPool(raw) {
 
   return {
     pool: {
-      _id: raw.id,
+      pool_id: raw.poolId,
       name: `${token0.symbol} ↔ ${token1.symbol}`,
       symbol: `${token0.symbol}/${token1.symbol}`,
       address: raw.id,
@@ -95,14 +95,18 @@ exports.list_pool = async (req, res, next) => {
       reserves: ['0', '0']
     }));        
 
+    // **ONLY include V2 pools**
+    const v2Only = normalized.filter(p => p.protocolVersion === 'V2');
+
     // slice pagination
     const sliceStart = (offset - 1) * limit;
     const sliceEnd   = sliceStart + limit;
-    const selected   = normalized.slice(sliceStart, sliceEnd);
+    const selected   = v2Only.slice(sliceStart, sliceEnd);
 
     // transform each raw pool
     const formatted = selected
       .map(raw => {
+        console.log("Raw data: ", raw)
         return formatRawPool(raw);
       })
       .filter(p => p !== null);
